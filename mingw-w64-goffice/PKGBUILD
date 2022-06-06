@@ -27,6 +27,7 @@ makedepends=(
   ${MINGW_PACKAGE_PREFIX}-lasem
   ${MINGW_PACKAGE_PREFIX}-gtk-doc
   ${MINGW_PACKAGE_PREFIX}-gobject-introspection
+  libtool
   intltool
   autoconf-archive
   automake-wrapper
