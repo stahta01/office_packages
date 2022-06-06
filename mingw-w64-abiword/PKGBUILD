@@ -1,0 +1,103 @@
+# Contributor: Tim Stahlhut <stahta01@gmail.com>
+
+_realname=abiword
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+#provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+#conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=3.0.4
+pkgrel=1
+_sourcedir=${_realname}-$pkgver
+pkgdesc="Word Processor (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+url="https://www.abisource.com"
+license=('GPL')
+options=('!strip' 'debug' '!makeflags')
+#options=('strip' '!debug' '!makeflags')
+depends=(
+#Package 'wv-1.0', required by 'virtual:world', not found
+  ${MINGW_PACKAGE_PREFIX}-goffice
+  ${MINGW_PACKAGE_PREFIX}-fribidi
+#  ${MINGW_PACKAGE_PREFIX}-wv           # needs very little
+  ${MINGW_PACKAGE_PREFIX}-librsvg
+  ${MINGW_PACKAGE_PREFIX}-enchant
+  ${MINGW_PACKAGE_PREFIX}-desktop-file-utils
+#  ${MINGW_PACKAGE_PREFIX}-redland      # needs a several packages
+  ${MINGW_PACKAGE_PREFIX}-libical
+  ${MINGW_PACKAGE_PREFIX}-gtk-update-icon-cache
+#  ${MINGW_PACKAGE_PREFIX}-loudmouth    # needs a several packages
+  ${MINGW_PACKAGE_PREFIX}-libwpg
+#  ${MINGW_PACKAGE_PREFIX}-libwps       # needs very little
+  ${MINGW_PACKAGE_PREFIX}-libwmf
+#  ${MINGW_PACKAGE_PREFIX}-link-grammar # needs several packages
+#  ${MINGW_PACKAGE_PREFIX}-gtkmathview  # needs very little
+#  ${MINGW_PACKAGE_PREFIX}-aiksaurus    # needs only gtk2 or higher
+  ${MINGW_PACKAGE_PREFIX}-libxslt
+  ${MINGW_PACKAGE_PREFIX}-libsoup
+#  ${MINGW_PACKAGE_PREFIX}-libots       # needs very little
+  ${MINGW_PACKAGE_PREFIX}-libgsf
+#  ${MINGW_PACKAGE_PREFIX}-psiconv      # needs very little
+)
+makedepends=(
+  ${MINGW_PACKAGE_PREFIX}-boost
+  ${MINGW_PACKAGE_PREFIX}-gobject-introspection
+  ${MINGW_PACKAGE_PREFIX}-python-gobject
+  ${MINGW_PACKAGE_PREFIX}-libwpd 
+#  ${MINGW_PACKAGE_PREFIX}-libwps
+  ${MINGW_PACKAGE_PREFIX}-python2-gobject2
+  ${MINGW_PACKAGE_PREFIX}-python-gobject
+  ${MINGW_PACKAGE_PREFIX}-pkgconf                 # conflicts with pkg-config
+#  ${MINGW_PACKAGE_PREFIX}-pkg-config             # conflicts with pkgconf
+  autoconf-archive
+  libtool )
+optdepends=()
+source=(https://www.abisource.com/downloads/$_realname/$pkgver/source/$_realname-$pkgver.tar.gz)
+sha256sums=('e93096cb192e5bc19d62e180fc5eda643206465315a710113ae5036bc2a1a5d7')
+
+prepare() {
+  cd ${srcdir}/${_sourcedir}
+
+# https://github.com/archlinux/svntogit-packages/blob/packages/abiword/trunk/PKGBUILD
+
+  libtoolize --force
+  autoreconf -fi
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+  mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
+
+  CPPFLAGS+=" -Wno-deprecated-declarations"
+
+  # configure option --disable-silent-rules useful to aid in debugging
+
+  ../${_sourcedir}/configure \
+      --prefix=${MINGW_PREFIX} \
+      --host=${MINGW_CHOST} \
+      --target=${MINGW_CHOST} \
+      --build=${MINGW_CHOST} \
+      --with-goffice \
+      --enable-shared \
+      --disable-static \
+      --disable-introspection \
+      --disable-silent-rules
+
+#  local WINPREFIX=$(cygpath -m ${MINGW_PREFIX})
+#  local UNIXPREFIX=$(cygpath -u ${MINGW_PREFIX})
+#
+#  # the local project libtool is having problems with linker search path
+#  # libtool:   error: Could not determine the host path corresponding to
+#  sed -i "s|-L${WINPREFIX}|-L${UNIXPREFIX}|g" "${srcdir}/build-${CARCH}/src/Makefile"
+
+  make -j1 V=1
+}
+
+package() {
+  cd "${srcdir}"/build-${CARCH}
+
+  make DESTDIR="${pkgdir}" install
+
+  install -Dm644 ${srcdir}/${_sourcedir}/COPYRIGHT.TXT ${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYRIGHT.TXT
+  install -Dm644 ${srcdir}/${_sourcedir}/COPYING ${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING
+}
