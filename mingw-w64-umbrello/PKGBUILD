@@ -1,0 +1,66 @@
+# ArchLinux Maintainer: Antonio Rojas <arojas@archlinux.org>
+# ArchLinux Maintainer: Felix Yan <felixonmars@archlinux.org>
+# ArchLinux Contributor: Andrea Scarpino <andrea@archlinux.org>
+
+# Needs https://archlinux.org/packages/extra/x86_64/kdelibs4support/
+
+_realname=umbrello
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=21.08.1
+pkgrel=1
+pkgdesc='UML modeller'
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+url='https://kde.org/applications/development/umbrello'
+license=(GPL)
+depends=(
+  "${MINGW_PACKAGE_PREFIX}-hicolor-icon-theme"
+  # qt5-webkit
+  "${MINGW_PACKAGE_PREFIX}-ktexteditor-qt5"
+  "${MINGW_PACKAGE_PREFIX}-qtwebkit"
+  "${MINGW_PACKAGE_PREFIX}-qt5-svg"
+  "${MINGW_PACKAGE_PREFIX}-karchive-qt5"
+  "${MINGW_PACKAGE_PREFIX}-kconfig-qt5"
+  "${MINGW_PACKAGE_PREFIX}-kcoreaddons-qt5"
+  "${MINGW_PACKAGE_PREFIX}-kcrash-qt5"
+)
+makedepends=(
+  "${MINGW_PACKAGE_PREFIX}-extra-cmake-modules"
+  "${MINGW_PACKAGE_PREFIX}-kdoctools-qt5"
+  # python
+)
+groups=(kde-applications)
+source=("https://download.kde.org/stable/release-service/$pkgver/src/$_realname-$pkgver.tar.xz")
+# https://download.kde.org/stable/umbrello/latest/src/umbrello-2.32.0-src.7z
+noextract=("${_realname}-${pkgver}.tar.xz")
+sha256sums=('ec59d5a01e7bb216fab97dadba02018a7de8b88c144553da87f9fae6231c8e74')
+validpgpkeys=(CA262C6C83DE4D2FB28A332A3A6A4DB839EAA6D7  # Albert Astals Cid <aacid@kde.org>
+              F23275E4BF10AFC1DF6914A6DBD2CE893E2D1C87) # Christoph Feck <cfeck@kde.org>
+
+prepare() {
+  cd $srcdir
+  # work around an issue with symbolic links in the tarball.
+  /usr/bin/bsdtar zxvf $srcdir/${_realname}-${pkgver}.tar.xz || true
+
+  mkdir -p build
+}
+
+build() {
+  cd build
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+  ${MINGW_PREFIX}/bin/cmake ../$_realname-$pkgver \
+    -G "MSYS Makefiles" \
+    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DKDE_INSTALL_LIBDIR=lib \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_UNITTESTS=OFF \
+    -DBUILD_KF5=ON
+  make
+}
+
+package() {
+  cd build
+  make DESTDIR="$pkgdir" install
+}
