@@ -8,7 +8,7 @@ pkgname=(
 )
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=0.10.49.0
+pkgver=0.10.52.0
 pkgrel=1
 pkgdesc="A GLib/GTK+ set of document-centric objects and utilities (mingw-w64)"
 arch=('any')
@@ -34,7 +34,7 @@ makedepends=(
   autoconf
   git
 )
-_git_tag=GOFFICE_0_10_49
+_git_tag=GOFFICE_0_10_52
 
 _git_repo_url="git+https://gitlab.gnome.org/GNOME/goffice.git"
 source=(${_sourcedir}::"${_git_repo_url}#tag=$_git_tag")
