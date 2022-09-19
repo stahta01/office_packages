@@ -6,8 +6,8 @@ pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=1.12.50.0
-pkgrel=2
+pkgver=1.12.52.0
+pkgrel=1
 pkgdesc="Spreadsheet Program (mingw-w64)"
 arch=('any')
 url="http://www.gnumeric.org/"
@@ -42,7 +42,7 @@ optdepends=("${MINGW_PACKAGE_PREFIX}-python-gobject: for python plugin support"
             "perl: for perl plugin support"
             "${MINGW_PACKAGE_PREFIX}-yelp: for viewing the help manual")
 _git_commit=
-_git_tag=GNUMERIC_1_12_50
+_git_tag=GNUMERIC_1_12_52
 
 _git_repo_url="git+https://gitlab.gnome.org/GNOME/gnumeric.git"
 if [ -n "$_git_tag" ]; then
