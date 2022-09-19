@@ -8,17 +8,18 @@ pkgname=(
 )
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=0.10.52.0
+pkgver=0.10.53.0
 pkgrel=1
 pkgdesc="A GLib/GTK+ set of document-centric objects and utilities (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw32' 'mingw64' 'ucrt64')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64')
 url="https://git.gnome.org/browse/goffice"
 license=(GPL)
 options=('!strip' 'debug' ) # 'staticlibs')
 #options=('strip' '!debug' ) # 'staticlibs')
 depends=()
 makedepends=(
+  ${MINGW_PACKAGE_PREFIX}-cc
   ${MINGW_PACKAGE_PREFIX}-librsvg
   ${MINGW_PACKAGE_PREFIX}-gtk3
   ${MINGW_PACKAGE_PREFIX}-libgsf
@@ -27,14 +28,14 @@ makedepends=(
   ${MINGW_PACKAGE_PREFIX}-lasem
   ${MINGW_PACKAGE_PREFIX}-gtk-doc
   ${MINGW_PACKAGE_PREFIX}-gobject-introspection
-  libtool
+  ${MINGW_PACKAGE_PREFIX}-libtool
   intltool
   autoconf-archive
   automake-wrapper
   autoconf
   git
 )
-_git_tag=GOFFICE_0_10_52
+_git_tag=GOFFICE_0_10_53
 
 _git_repo_url="git+https://gitlab.gnome.org/GNOME/goffice.git"
 source=(${_sourcedir}::"${_git_repo_url}#tag=$_git_tag")
