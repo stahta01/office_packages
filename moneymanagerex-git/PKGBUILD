@@ -1,0 +1,81 @@
+# Contributor: Tim Stahlhut <stahta01@gmail.com>
+# Contributor: Martin Dünkelmann
+
+_realname=moneymanagerex
+_sourcedir=${_realname}-git
+_wx_basever=3.2
+pkgbase=mingw-w64-${_realname}
+pkgname=${_realname}-git
+#_git_tag=v1.3.6
+_git_tag=v1.6.2
+pkgver=1.6.2.r0.g99da0db32
+pkgrel=1
+pkgdesc="MoneyManagerEx is an easy-to-use personal finance suite. (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64')
+url="http://www.moneymanagerex.org/"
+license=('GPL')
+options=('!strip')
+#depends=('wxwidgets-gtk3' 'webkit2gtk')
+depends=(${MINGW_PACKAGE_PREFIX}-wxwidgets${_wx_basever}-msw-libs)
+makedepends=( 'gawk' 'git' # 'jq' 'make'
+  ${MINGW_PACKAGE_PREFIX}-cmake
+  ${MINGW_PACKAGE_PREFIX}-file
+  ${MINGW_PACKAGE_PREFIX}-cc
+  ${MINGW_PACKAGE_PREFIX}-gettext
+  ${MINGW_PACKAGE_PREFIX}-pkg-config
+  ${MINGW_PACKAGE_PREFIX}-rapidjson
+  ${MINGW_PACKAGE_PREFIX}-wxwidgets${_wx_basever}-msw
+  ${MINGW_PACKAGE_PREFIX}-ccache
+)
+optdepends=('cups: for printing support')
+#replaces=('mmex')
+provides=(${_realname})
+conflicts=(${_realname})
+source=(${_sourcedir}::git+https://github.com/moneymanagerex/moneymanagerex.git#tag=${_git_tag})
+sha512sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}"/${_sourcedir}
+
+  git describe --tags --long | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${srcdir}"/${_sourcedir}
+
+  git submodule update --init --recursive
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${MSYSTEM} ]] && rm -rf "${srcdir}"/build-${MSYSTEM}
+  mkdir -p "${srcdir}"/build-${MSYSTEM} && cd "${srcdir}"/build-${MSYSTEM}
+
+  # Disable all warnings when building, then configure CMake
+  export CXXFLAGS=-w
+
+  declare -a extra_config
+  if check_option "debug" "n"; then
+    extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+  else
+    extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+  fi
+
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=;DCMAKE_PREFIX_PATH=;DEFAULT_INSTALL_PATH=" \
+    "${MINGW_PREFIX}"/bin/cmake.exe \
+        -GNinja \
+        -DCMAKE_PREFIX_PATH="${MINGW_PREFIX}" \
+        -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
+        "${extra_config[@]}" \
+        -DDEFAULT_INSTALL_PATH="${MINGW_PREFIX}" \
+        -DwxWidgets_CONFIG_EXECUTABLE="${MINGW_PREFIX}"/bin/wx-config-${_wx_basever} \
+        ../${_sourcedir}
+
+  "${MINGW_PREFIX}"/bin/cmake.exe --build . # --parallel 1 --verbose
+  #cmake --build . --target package
+}
+
+package() {
+  cd "${srcdir}/build-${MSYSTEM}"
+  DESTDIR="${pkgdir}" "${MINGW_PREFIX}"/bin/cmake.exe --install . # --parallel 1 --verbose
+}
