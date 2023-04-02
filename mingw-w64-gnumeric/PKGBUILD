@@ -34,6 +34,7 @@ makedepends=(
   autoconf
   automake-wrapper
   bison
+  libtool
   make
   patch
   git
@@ -102,6 +103,9 @@ prepare() {
   echo "_git_nearest_tag := $_git_nearest_tag"
 
   GIT_AM="git am --committer-date-is-author-date"
+
+  git config --local user.name  "nobody"
+  git config --local user.email "nobody@example.com"
 
   # Fix configure errors
   # Fix compiling errors
